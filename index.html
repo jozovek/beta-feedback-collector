@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Beta Feedback</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <header class="page-header">
+      <h1>Beta Feedback</h1>
+      <p class="subtitle">Log what you noticed during the beta.</p>
+    </header>
+
+    <section class="submit-section">
+      <form id="feedback-form" class="feedback-form">
+        <div class="field">
+          <label for="title">Short title</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            maxlength="80"
+            placeholder="Button to submit was hard to find"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="description">
+            Full description <span class="optional">(optional)</span>
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            placeholder="If you want to say more, add it here."
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label for="theme">Theme</label>
+          <select id="theme" name="theme" required>
+            <option value="" disabled selected>Select a theme…</option>
+            <option value="Bug">Bug</option>
+            <option value="Usability/UX">Usability/UX</option>
+            <option value="Feature Request">Feature Request</option>
+            <option value="General Reaction">General Reaction</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="name">Your name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Jane Tester"
+            required
+          >
+        </div>
+
+        <button type="submit" class="submit-button">Submit feedback</button>
+
+        <div id="form-confirmation" class="form-confirmation" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <section class="triage-section">
+      <div class="filter-bar" role="toolbar" aria-label="Filter by theme">
+        <button type="button" class="filter-button is-active" data-filter="All">All</button>
+        <button type="button" class="filter-button" data-filter="Bug">Bug</button>
+        <button type="button" class="filter-button" data-filter="Usability/UX">Usability/UX</button>
+        <button type="button" class="filter-button" data-filter="Feature Request">Feature Request</button>
+        <button type="button" class="filter-button" data-filter="General Reaction">General Reaction</button>
+      </div>
+
+      <div id="feedback-list" class="feedback-list">
+        <!-- Feedback rows are rendered here by app.js -->
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
