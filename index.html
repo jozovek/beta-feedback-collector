@@ -2,14 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Beta Feedback</title>
+  <title>Share Your Feedback</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main class="container">
     <header class="page-header">
-      <h1>Beta Feedback</h1>
-      <p class="subtitle">Log what you noticed during the beta.</p>
+      <h1>Share Your Feedback</h1>
+      <p class="subtitle">
+        Thanks for taking the time to test! Use this form to let us know what
+        you noticed — bugs, rough edges, ideas, or anything else. Every piece
+        of feedback helps us build a better product.
+      </p>
     </header>
 
     <section class="submit-section">
@@ -64,20 +68,6 @@
 
         <div id="form-confirmation" class="form-confirmation" aria-live="polite"></div>
       </form>
-    </section>
-
-    <section class="triage-section">
-      <div class="filter-bar" role="toolbar" aria-label="Filter by theme">
-        <button type="button" class="filter-button is-active" data-filter="All">All</button>
-        <button type="button" class="filter-button" data-filter="Bug">Bug</button>
-        <button type="button" class="filter-button" data-filter="Usability/UX">Usability/UX</button>
-        <button type="button" class="filter-button" data-filter="Feature Request">Feature Request</button>
-        <button type="button" class="filter-button" data-filter="General Reaction">General Reaction</button>
-      </div>
-
-      <div id="feedback-list" class="feedback-list">
-        <!-- Feedback rows are rendered here by app.js -->
-      </div>
     </section>
   </main>
 

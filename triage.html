@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Feedback Triage</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <header class="page-header">
+      <h1>Feedback Triage</h1>
+      <p class="subtitle">Review, filter, and prioritize incoming feedback.</p>
+    </header>
+
+    <section class="triage-section">
+      <div class="filter-bar" role="toolbar" aria-label="Filter by theme">
+        <button type="button" class="filter-button is-active" data-filter="All">All</button>
+        <button type="button" class="filter-button" data-filter="Bug">Bug</button>
+        <button type="button" class="filter-button" data-filter="Usability/UX">Usability/UX</button>
+        <button type="button" class="filter-button" data-filter="Feature Request">Feature Request</button>
+        <button type="button" class="filter-button" data-filter="General Reaction">General Reaction</button>
+      </div>
+
+      <div id="feedback-list" class="feedback-list">
+        <!-- Feedback rows are rendered here by app.js -->
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

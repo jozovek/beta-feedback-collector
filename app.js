@@ -1,10 +1,10 @@
 // Beta Feedback Collector — app logic.
-// Phase 5: up/down arrow reordering with persistence.
+// Shared by both views: the tester form (index.html) and the PM triage list (triage.html).
+// Each page only has the elements it needs; the code detects which page it's on.
 
 const STORAGE_KEY = 'beta-feedback-items';
 
 // Maps each theme to a CSS class suffix used for the pill color.
-// Edit here if a new theme is added.
 const THEME_CLASSES = {
   'Bug': 'bug',
   'Usability/UX': 'usability',
@@ -12,32 +12,29 @@ const THEME_CLASSES = {
   'General Reaction': 'reaction',
 };
 
+// Elements — some will be null depending on which page loaded this script.
 const form = document.getElementById('feedback-form');
 const listEl = document.getElementById('feedback-list');
 const confirmationEl = document.getElementById('form-confirmation');
 const filterButtons = document.querySelectorAll('.filter-button');
 
-// Which theme the PM has filtered to. "All" means show everything.
-// Lives in memory only — refreshing the page resets to "All".
+// Filter state (triage view only, lives in memory).
 let activeFilter = 'All';
 
 // ---------- Storage helpers ----------
 
-// Return the full array of saved feedback (or an empty array on first load).
 function loadFeedback() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return [];
   return JSON.parse(raw);
 }
 
-// Overwrite localStorage with the current array.
 function saveFeedback(items) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
 // ---------- Time formatting ----------
 
-// Convert an ISO timestamp into a short human-readable phrase like "2 hours ago".
 function formatRelativeTime(isoString) {
   const then = new Date(isoString);
   const seconds = Math.floor((Date.now() - then.getTime()) / 1000);
@@ -57,10 +54,8 @@ function formatRelativeTime(isoString) {
   return `${months} month${months === 1 ? '' : 's'} ago`;
 }
 
-// ---------- Reordering ----------
+// ---------- Reordering (triage view only) ----------
 
-// Move an item up or down by swapping it with its nearest visible neighbor.
-// "Visible" depends on the current filter. Hidden items stay where they are.
 function moveItem(id, direction) {
   const items = loadFeedback();
   const currentIndex = items.findIndex((item) => item.id === id);
@@ -69,7 +64,6 @@ function moveItem(id, direction) {
   const isVisible = (item) =>
     activeFilter === 'All' || item.theme === activeFilter;
 
-  // Walk through the global array looking for the next visible neighbor.
   let targetIndex = -1;
   if (direction === 'up') {
     for (let i = currentIndex - 1; i >= 0; i--) {
@@ -87,20 +81,19 @@ function moveItem(id, direction) {
     }
   }
 
-  // No visible neighbor in that direction — already at the edge.
   if (targetIndex === -1) return;
 
-  // Swap the two items in place. Hidden items between them don't move.
   [items[currentIndex], items[targetIndex]] = [items[targetIndex], items[currentIndex]];
 
   saveFeedback(items);
   renderList();
 }
 
-// ---------- Rendering ----------
+// ---------- Rendering (triage view only) ----------
 
-// Wipe and re-draw the list, applying the active filter.
 function renderList() {
+  if (!listEl) return;
+
   const items = loadFeedback();
   listEl.innerHTML = '';
 
@@ -108,7 +101,6 @@ function renderList() {
     ? items
     : items.filter((item) => item.theme === activeFilter);
 
-  // Empty state: nothing to show, either because nothing exists or the filter hides everything.
   if (visibleItems.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'feedback-empty';
@@ -123,7 +115,6 @@ function renderList() {
     const row = document.createElement('div');
     row.className = 'feedback-item';
 
-    // The always-visible summary row.
     const summary = document.createElement('div');
     summary.className = 'item-summary';
 
@@ -145,7 +136,6 @@ function renderList() {
     downButton.title = 'Move down';
     downButton.disabled = visibleIndex === visibleItems.length - 1;
 
-    // stopPropagation so the click doesn't also expand/collapse the row.
     upButton.addEventListener('click', (event) => {
       event.stopPropagation();
       moveItem(item.id, 'up');
@@ -201,55 +191,70 @@ function renderList() {
   });
 }
 
-// Show the "Thanks!" confirmation, then hide it after a few seconds.
+// ---------- Confirmation (tester view only) ----------
+
 function showConfirmation() {
-  confirmationEl.textContent = 'Thanks! Your feedback was logged.';
+  if (!confirmationEl) return;
+  confirmationEl.textContent = 'Thanks for sharing! Your feedback has been recorded.';
   confirmationEl.classList.add('visible');
   setTimeout(() => {
     confirmationEl.classList.remove('visible');
   }, 2500);
 }
 
-// ---------- Form handling ----------
+// ============================================================
+//  Page-specific setup
+//  The same script runs on both pages. Each block only activates
+//  if the elements it needs are present in the HTML.
+// ============================================================
 
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
+// ---------- Tester view: wire up the form ----------
 
-  const formData = new FormData(form);
-  const newItem = {
-    id: crypto.randomUUID(),
-    title: formData.get('title').trim(),
-    description: formData.get('description').trim(),
-    theme: formData.get('theme'),
-    name: formData.get('name').trim(),
-    createdAt: new Date().toISOString(),
-  };
+if (form) {
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
 
-  const items = loadFeedback();
-  items.push(newItem);
-  saveFeedback(items);
+    const formData = new FormData(form);
+    const newItem = {
+      id: crypto.randomUUID(),
+      title: formData.get('title').trim(),
+      description: formData.get('description').trim(),
+      theme: formData.get('theme'),
+      name: formData.get('name').trim(),
+      createdAt: new Date().toISOString(),
+    };
 
-  form.reset();
-  showConfirmation();
-  renderList();
-});
+    const items = loadFeedback();
+    items.push(newItem);
+    saveFeedback(items);
 
-// ---------- Filter handling ----------
-
-filterButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    activeFilter = button.dataset.filter;
-
-    // Update which button looks "active".
-    filterButtons.forEach((b) => b.classList.remove('is-active'));
-    button.classList.add('is-active');
-
-    renderList();
+    form.reset();
+    showConfirmation();
   });
-});
+}
 
-// ---------- Startup ----------
+// ---------- Triage view: wire up filters, render list, listen for updates ----------
 
-renderList();
+if (listEl) {
+  filterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      activeFilter = button.dataset.filter;
+      filterButtons.forEach((b) => b.classList.remove('is-active'));
+      button.classList.add('is-active');
+      renderList();
+    });
+  });
+
+  // Initial render.
+  renderList();
+
+  // Auto-update when another tab (the tester view) saves new feedback.
+  // The "storage" event only fires in OTHER tabs, not the one that wrote.
+  window.addEventListener('storage', (event) => {
+    if (event.key === STORAGE_KEY) {
+      renderList();
+    }
+  });
+}
 
 console.log('Beta Feedback Collector loaded');
